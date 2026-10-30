@@ -1,91 +1,758 @@
 # Delhivery Last-Mile Delay Intelligence Pipeline
 
-**Capstone:** AI and Machine Learning Certification Program · E&ICT Academy, IIT Roorkee  
-**Dataset:** Synthetic shipments generated locally; no real Delhivery shipment records are used.
+**Capstone Project:** AI and Machine Learning Certification Program  
+**Institution:** E&ICT Academy, IIT Roorkee  
+**Project:** Delhivery Last-Mile Delay Intelligence Pipeline  
+**Dataset:** Synthetic shipment data generated locally. No real Delhivery shipment records are used.
 
-This repository implements one connected workflow: clean historical shipments, build reusable features, estimate delivery hours, classify late parcels, segment hubs, package the classifier, and generate an action list for 48 new shipments.
+---
 
-## How to run
+## 1. Project Overview
 
-Run all commands from the repository root in this order, on a clean clone:
+This project develops an end-to-end machine learning pipeline to analyze last-mile delivery performance, predict delivery delays, identify operationally challenging hubs, and recommend actions for new shipments.
+
+The pipeline covers four major stages:
+
+1. **Data Cleaning and Exploratory Data Analysis:** Clean shipment records, handle missing values and duplicates, engineer features, and identify delay patterns.
+2. **Delivery Time Prediction:** Build and compare regression models to estimate delivery time in hours.
+3. **Delay Classification:** Train classification models to identify shipments at risk of delay and optimize the prediction threshold.
+4. **Hub Segmentation and Operational Recommendations:** Group hubs according to operational performance and generate recommended actions for new shipments.
+
+The final workflow also includes model packaging, model reload validation, and batch prediction for 48 new shipments.
+
+---
+
+## 2. Project Structure
+
+```text
+delhivery-capstone/
+│
+├── data/
+│   ├── hubs.csv
+│   ├── raw_shipments.csv
+│   ├── new_shipments.csv
+│   └── modelling_table.csv
+│
+├── models/
+│   ├── delay_model.pkl
+│   ├── delay_threshold.csv
+│   ├── feature_order.csv
+│   └── impute_values.csv
+│
+├── outputs/
+│   ├── part_a_checks.csv
+│   ├── part_a_correlations.csv
+│   ├── part_a_delay_by_group.csv
+│   ├── part_b_checks.csv
+│   ├── part_b_cv.csv
+│   ├── part_b_metrics.csv
+│   ├── part_b_tree_depth.csv
+│   ├── part_b_gb_learning_rate.csv
+│   ├── part_c_models.csv
+│   ├── part_c_feature_scores.csv
+│   ├── part_c_selectk.csv
+│   ├── part_c_tuning.csv
+│   ├── part_c_thresholds.csv
+│   ├── part_c_final_config.csv
+│   ├── part_c_final_test.csv
+│   ├── hub_profile.csv
+│   ├── hub_segments.csv
+│   ├── segment_profile.csv
+│   ├── tier_vs_segment_mismatch.csv
+│   ├── part_d_separation.csv
+│   ├── part_d_reload_check.csv
+│   └── new_shipment_actions.csv
+│
+├── src/
+│   └── shipment_prep.py
+│
+├── generate_data.py
+├── part_a_clean_eda.py
+├── part_b_regression.py
+├── part_c_classification.py
+├── part_d_segments.py
+├── package_model.py
+├── predict_delay.py
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 3. Technologies Used
+
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Joblib
+- Matplotlib / Seaborn, where used for analysis
+- Git and GitHub
+
+### Python Dependencies
+
+The project uses the following pinned dependencies:
+
+| Library | Version |
+|---|---|
+| pandas | 2.2.3 |
+| numpy | 2.3.5 |
+| scikit-learn | 1.8.0 |
+| joblib | 1.5.3 |
+
+---
+
+## 4. How to Run the Project
+
+### Prerequisites
+
+- Python 3.10 or later, compatible with the pinned dependencies.
+- pip
+- Git
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+cd YOUR_REPOSITORY
+```
+
+Replace the repository URL with the actual GitHub repository URL.
+
+### Step 2: Install dependencies
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Step 3: Generate the dataset
+
+```bash
 python generate_data.py
+```
+
+Expected generator console output:
+
+```text
+24 1224 48
+```
+
+This generates:
+
+- `data/hubs.csv`
+- `data/raw_shipments.csv`
+- `data/new_shipments.csv`
+
+The supplied data generator should not be modified.
+
+### Step 4: Run Part A – Data Cleaning and EDA
+
+```bash
 python part_a_clean_eda.py
+```
+
+This step performs:
+
+- Duplicate removal.
+- Missing-value treatment.
+- Sentinel-value handling.
+- Service-type standardization.
+- Feature engineering.
+- Hub information merging.
+- Exploratory data analysis.
+- Delay-rate analysis.
+
+### Step 5: Run Part B – Regression
+
+```bash
 python part_b_regression.py
+```
+
+This step trains and evaluates regression models for delivery-time prediction.
+
+### Step 6: Run Part C – Classification
+
+```bash
 python part_c_classification.py
+```
+
+This step performs:
+
+- Classification model comparison.
+- Feature selection.
+- Hyperparameter tuning.
+- Threshold optimization.
+- Final test evaluation.
+
+### Step 7: Run Part D – Hub Segmentation
+
+```bash
 python part_d_segments.py
+```
+
+This step generates hub profiles, clusters, segment assignments, and tier-versus-segment mismatch analysis.
+
+### Step 8: Package the model
+
+```bash
 python package_model.py
+```
+
+This generates the serialized model and supporting preprocessing configuration.
+
+### Step 9: Predict new shipment delays
+
+```bash
 python predict_delay.py
 ```
 
-`generate_data.py` writes `data/hubs.csv`, `data/raw_shipments.csv`, and `data/new_shipments.csv`; its expected console output is `24 1224 48`. It is committed as the supplied generator and should not be edited. Part A writes `data/modelling_table.csv` and its evidence CSVs. Parts B and C write regression and classification diagnostics. Part D writes the hub profiles and segments. `package_model.py` regenerates `models/delay_model.pkl`, the threshold, feature-order, and imputation files. `predict_delay.py` writes `outputs/new_shipment_actions.csv`.
+This generates:
 
-The committed pickle is tied to the scikit-learn version pinned in `requirements.txt`. Rebuild it by running `python package_model.py` in the pinned environment; if the installed scikit-learn version differs, regenerate rather than relying on the committed pickle. All CSV outputs are written without DataFrame indexes except the correlation matrix, where the row labels are intentionally retained as the first column.
+```text
+outputs/new_shipment_actions.csv
+```
 
-## Data findings
+**Important:** Run the scripts in the above order from the repository root. `package_model.py` regenerates the packaged classifier and its supporting configuration. Use the pinned dependency versions for reproducibility.
 
-- **Service promise:** Express shipments have the highest delay rate: **0.4897** (119 delayed out of 243). Standard is 0.2056 and Economy is 0.0857 (`outputs/part_a_delay_by_group.csv`).
-- **Hub tier:** Delay rate rises from **0.0400** for Tier 1 to **0.2150** for Tier 2 and **0.4400** for Tier 3 (`outputs/part_a_delay_by_group.csv`).
-- **Distance:** Delay rate rises across bands: **0.0219** at 0–200 km, **0.1368** at 201–400 km, **0.4364** at 401–600 km, and **0.8523** above 600 km (`outputs/part_a_delay_by_group.csv`).
-- **Correlations with delivery time:** the three strongest absolute correlations excluding `delivery_hours` itself are `promised_hours` **+0.8372**, `distance_km` **+0.4013**, and `n_stops` **+0.3247** (`outputs/part_a_correlations.csv`). Correlation is association, not proof of causation.
-- **Declared value transformation:** the median-filled `declared_value_inr` has mean **INR 1,533.0542** and median **INR 1,121.5000**, showing a right-skewed distribution. After natural-log transformation, the mean is **7.0277** and median **7.0224**, which are much closer; the log reduces the influence of high declared values (`outputs/part_a_checks.csv`).
-- **Cleaning evidence:** the 1,224-row raw file contains 24 exact duplicate rows; 1,200 unique rows remain. Five weight sentinels are treated as missing before median imputation. The final modelling table has zero nulls across the pinned 17 features and the target columns (`outputs/part_a_checks.csv`).
+---
 
-## Model results (regression)
+## 5. Part A – Data Cleaning and Exploratory Data Analysis
 
-The split is **840 training / 180 validation / 180 test**. The training-scaled maximum absolute feature mean is effectively zero, while the test-scaled maximum absolute mean is **0.2187**, consistent with fitting the scaler on training rows only (`outputs/part_b_checks.csv`).
+### Dataset Cleaning
 
-- The mean baseline has validation **R² = -0.0212**: predicting one constant mean is slightly worse than predicting the validation target mean and does not explain useful variation.
-- **Linear regression** wins the validation comparison with RMSE **4.8912 hours** and R² **0.9313**. Gradient boosting is close at RMSE 4.9165 and R² 0.9306. Linear regression is the selected final regression model and has test RMSE **4.5235 hours**, test R² **0.9493** (`outputs/part_b_metrics.csv`).
-- Tree depth 1 has high bias: training RMSE 11.6334 and validation RMSE 12.1324 are both high. The unlimited tree has high variance: training RMSE 0.0000 versus validation RMSE 7.8368. Depth 6 has the lowest validation RMSE, **6.2796** (`outputs/part_b_tree_depth.csv`).
-- The best tested gradient-boosting learning rate is **0.1** (validation R² 0.9306). At 0.01, learning is too slow for 100 estimators (R² 0.7127); at 1.0, the larger steps overshoot useful improvements (R² 0.8440) (`outputs/part_b_gb_learning_rate.csv`).
-- Cross-validation on the combined 1,020 training-plus-validation rows slightly favors gradient boosting (mean R² **0.9353**, std 0.0045) over linear regression (mean R² 0.9261, std 0.0048). For this repository, linear regression is retained because it wins the held-out validation comparison and performs strongly on the untouched test set; the cross-validation difference is small and both are stable (`outputs/part_b_cv.csv`).
+The raw dataset initially contained 1,224 shipment records.
 
-## Model results (classification)
+| Metric | Result |
+|---|---:|
+| Raw shipment records | 1,224 |
+| Duplicate records removed | 24 |
+| Records after deduplication | 1,200 |
+| Sentinel weight records | 5 |
+| Records after hub merge | 1,200 |
+| Nulls in final features and target | 0 |
 
-The stratified split has **195 / 42 / 41** delayed parcels across training, validation, and test, respectively. The all-on-time baseline reaches validation accuracy **0.7667**, but recall, precision, and F1 are all zero: it never identifies a delayed parcel, so accuracy alone is misleading (`outputs/part_c_models.csv`).
+Missing values were handled using median imputation for numerical columns and appropriate treatment for categorical columns.
 
-- The five bookkeeping/noise columns have combined random-forest importance **0.2245** (approximately 21.7%). All five are outside the top seven by F-score; their ranks are 8, 9, 11, 13, and 14, and each has F-score below 10 (`outputs/part_c_feature_scores.csv`).
-- The feature-count experiment gives validation F1 **0.5714** for k=5, **0.6743** for k=7, **0.6437** for k=10, **0.6509** for k=12, and **0.6163** for k=17. The required k=7 choice is a useful compact feature set (`outputs/part_c_selectk.csv`).
-- Tuning did not beat the untuned forest on this 180-row validation set: the untuned forest on the selected seven features has F1 **0.8333**, compared with 0.7750 for grid search and 0.7848 for randomized search. This illustrates why tuning should be judged on held-out performance, not only cross-validation accuracy (`outputs/part_c_tuning.csv`).
-- The selected model uses k=7, a 100-tree forest with unlimited depth and minimum leaf size 1. The alert threshold is **0.5**, the highest tested threshold with validation recall at least 0.80. At this threshold validation precision is 0.7955 and recall is 0.8333 (`outputs/part_c_thresholds.csv`, `outputs/part_c_final_config.csv`).
-- On the untouched test set, precision is **0.6889**, recall **0.7561**, and F1 **0.7209**. That is roughly 7 of every 10 flagged parcels truly delayed, and about 8 of every 10 delayed parcels caught. The test set contains only 41 delayed parcels, so recall is uncertain and should not be treated as a precise long-run guarantee (`outputs/part_c_final_test.csv`).
+Service-type spellings were standardized to three consistent categories:
 
-## Operations recommendation
+- Economy
+- Express
+- Standard
 
-Use the three hub segments as playbooks, alongside parcel-level risk probabilities. The **Escalate** segment contains nine hubs and has mean hub delay rate **0.4600**, mean delivery time 64.6504 hours, mean distance 470.4757 km, and mean route stops 84.3444. **Watch** has eight hubs and delay rate 0.1550; **Standard** has seven hubs and delay rate 0.0257 (`outputs/segment_profile.csv`).
+### Overall Delivery Performance
 
-Tier labels do not fully reflect current operating behavior. The mismatch file identifies **HUB07 Kolkata** (Tier 1, Watch), **HUB13 Nagpur** (Tier 2, Escalate), **HUB15 Kochi** (Tier 2, Escalate), and **HUB22 Dehradun** (Tier 3, Watch). Treat the tier as a planning label, not a substitute for measured hub performance, and review these four hubs operationally (`outputs/tier_vs_segment_mismatch.csv`).
+- Total shipments: **1,200**
+- Delayed shipments: **278**
+- Overall delay rate: **23.17%**
 
-At threshold 0.5, test precision is 0.6889 and recall is 0.7561. In the generated batch of 48 new parcels, **8 are flagged** and **6 of those require hub-manager escalation**; the remaining two flagged parcels receive proactive customer calls. Non-flagged parcels receive no action (`outputs/new_shipment_actions.csv`).
+### Key Business Findings
 
-K=3 is retained because the business needs exactly three playbooks and it yields a clear across-to-within distance ratio of **5.3928**, with cluster sizes **9-8-7**. The ratio rises at K=4 (6.3047) and K=5 (6.8866), but those solutions create clusters of only four or fewer hubs, too small to justify independent operating playbooks (`outputs/part_d_separation.csv`).
+**1. Service Type Analysis**
 
-## Production plan
+Express shipments have the highest delay rate.
 
-- **Accuracy:** keep regression MAE/RMSE/R² and classifier precision/recall/F1 in the versioned CSV outputs; compare them against the current baseline before promotion.
-- **Reliability:** fail the batch if any of the 17 model features is null, if shipment IDs are duplicated, or if the scoring output is not exactly one row per input shipment.
-- **Reproducibility:** use fixed random seeds, pinned dependency versions, a documented command order, and committed output CSVs. `package_model.py` checks that serialized and in-memory probabilities match.
-- **Performance:** record runtime and batch size for `predict_delay.py`; alert if the 48-row reference batch takes more than 10 seconds in the target environment, then set a production-specific SLA after measuring realistic volumes.
-- **Maintainability:** centralize cleaning and feature engineering in `src/shipment_prep.py`; the training and scoring scripts call the same functions.
-- **Consistency:** persist the exact feature order and imputation medians in `models/`; never independently reimplement preprocessing in production scoring.
-- **Monitorability:** store each batch's probability distribution, flagged share, hub segment, and eventual observed outcomes with a timestamp so delayed outcomes can be evaluated later.
+| Service Type | Shipments | Delayed | Delay Rate |
+|---|---:|---:|---:|
+| Economy | 315 | 27 | 8.57% |
+| Express | 243 | 119 | 48.97% |
+| Standard | 642 | 132 | 20.56% |
 
-Suggested initial monitoring triggers (review and recalibrate after enough production history):
+Express shipments require additional attention because their delay rate is substantially higher than the other service categories.
 
-1. **Weekly delayed share:** investigate if the share of delivered parcels that are late rises above **30%** or increases by more than **5 percentage points** versus the trailing four-week baseline.
-2. **Flagged share:** investigate if more than **35%** or fewer than **5%** of dispatched parcels are flagged in a week; this can indicate a data or distribution shift.
-3. **Recall on matured parcels:** once outcomes are known, alert if weekly recall falls below **0.70** over at least 50 delayed parcels; if fewer are available, report the sample size and avoid over-interpreting the metric.
-4. **Feature drift:** investigate if the weekly mean distance or stop count shifts by more than **20%** from the training baseline, or if any required feature's missingness exceeds **2%** before imputation.
+**2. Hub Tier Analysis**
 
-Retrain monthly at first, and sooner only if monitored performance or drift triggers are breached and the investigation confirms a sustained change. For the **15–28 September sale window**, compare against prior sale-event periods or an equivalent promotion window, not ordinary weeks, because `sale_event_flag` represents a distinct operating regime. Data drift may appear as changes in distance, stop count, rain frequency, service mix, hub mix, or sale-event frequency; monitor both feature distributions and delayed outcomes.
+| Hub Tier | Shipments | Delayed | Delay Rate |
+|---|---:|---:|---:|
+| Tier 1 | 400 | 16 | 4.00% |
+| Tier 2 | 400 | 86 | 21.50% |
+| Tier 3 | 400 | 176 | 44.00% |
 
-## Limitations
+Delay rates increase significantly from Tier 1 to Tier 3.
 
-1. The data is synthetic and reflects the generator's assumptions, not real-world Delhivery shipment behavior; external validity is unknown.
-2. The test set has only 41 delayed parcels, so a few outcomes can materially change precision and recall.
-3. The threshold was selected from one validation split and a coarse grid of nine thresholds; it may not be optimal under changed operating costs or class prevalence.
-4. Hub segments are based on a limited set of four aggregate profile metrics and 50 historical parcels per hub; they are operational summaries, not permanent labels.
-5. The classifier's probability values are not guaranteed to be calibrated; calibration and cost-sensitive evaluation should be considered before production deployment.
+**3. Distance Analysis**
+
+| Distance Band | Shipments | Delayed | Delay Rate |
+|---|---:|---:|---:|
+| 0–200 km | 274 | 6 | 2.19% |
+| 201–400 km | 563 | 77 | 13.68% |
+| 401–600 km | 275 | 120 | 43.64% |
+| 601+ km | 88 | 75 | 85.23% |
+
+Longer delivery distances are associated with significantly higher delay rates.
+
+**4. Correlation Analysis**
+
+The three strongest absolute correlations with delivery time, excluding delivery time itself, are:
+
+| Feature | Correlation |
+|---|---:|
+| promised_hours | +0.8372 |
+| distance_km | +0.4013 |
+| n_stops | +0.3247 |
+
+These features show meaningful associations with delivery time. Correlation does not establish causation.
+
+**5. Declared Value Transformation**
+
+The median-filled declared-value distribution is right-skewed.
+
+| Metric | Original Value | Log-Transformed |
+|---|---:|---:|
+| Mean | 1533.0542 | 7.0277 |
+| Median | 1121.5000 | 7.0224 |
+
+The natural-log transformation reduces the influence of high declared values and produces a more balanced distribution.
+
+---
+
+## 6. Part B – Delivery Time Regression
+
+The objective of Part B is to predict delivery time in hours.
+
+### Dataset Split
+
+| Dataset | Records |
+|---|---:|
+| Training | 840 |
+| Validation | 180 |
+| Testing | 180 |
+| Total | 1,200 |
+
+Feature scaling was fitted on the training data only to avoid data leakage.
+
+### Model Comparison
+
+Five approaches were evaluated:
+
+- Mean Baseline
+- Linear Regression
+- Decision Tree
+- Random Forest
+- Gradient Boosting
+
+Validation results:
+
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Mean Baseline | 15.7952 | 18.8552 | -0.0212 |
+| Linear Regression | 3.9222 | 4.8912 | 0.9313 |
+| Decision Tree | 5.0971 | 6.2796 | 0.8867 |
+| Random Forest | 4.2882 | 5.5095 | 0.9128 |
+| Gradient Boosting | 3.9166 | 4.9165 | 0.9306 |
+
+### Selected Regression Model
+
+**Linear Regression** was selected because it achieved the lowest validation RMSE.
+
+Final test performance:
+
+| Metric | Test Result |
+|---|---:|
+| MAE | 3.5671 |
+| RMSE | 4.5235 |
+| R² | 0.9493 |
+
+The test R² indicates that the model explains approximately 94.93% of the variation in delivery time on the held-out test dataset.
+
+### Decision Tree Depth Experiment
+
+| Maximum Depth | Training RMSE | Validation RMSE |
+|---|---:|---:|
+| 1 | 11.6334 | 12.1324 |
+| 2 | 9.3687 | 10.4114 |
+| 3 | 7.5295 | 8.7033 |
+| 4 | 6.0999 | 7.3896 |
+| 6 | 4.7114 | 6.2796 |
+| 8 | 3.3360 | 6.7901 |
+| 12 | 1.3613 | 7.3540 |
+| Unlimited | 0.0000 | 7.8368 |
+
+A shallow tree underfits the data, while an unrestricted tree overfits the training data.
+
+Depth 6 provides the lowest validation RMSE in this experiment.
+
+### Gradient Boosting Learning Rate
+
+| Learning Rate | Validation RMSE | Validation R² |
+|---|---:|---:|
+| 0.01 | 10.0018 | 0.7127 |
+| 0.1 | 4.9165 | 0.9306 |
+| 1.0 | 7.3701 | 0.8440 |
+
+A learning rate of 0.1 gives the best validation performance among the tested values.
+
+### Cross-Validation
+
+| Model | Mean R² | Standard Deviation |
+|---|---:|---:|
+| Linear Regression | 0.9261 | 0.0048 |
+| Gradient Boosting | 0.9353 | 0.0045 |
+
+Cross-validation slightly favors Gradient Boosting. However, Linear Regression is retained because it achieved the lowest validation RMSE and performed strongly on the untouched test set.
+
+---
+
+## 7. Part C – Delay Classification
+
+The objective is to classify shipments as delayed or not delayed.
+
+### Classification Dataset Split
+
+| Dataset | Delayed Shipments |
+|---|---:|
+| Training | 195 |
+| Validation | 42 |
+| Testing | 41 |
+
+The classification split is stratified to preserve the target distribution.
+
+### Classification Model Comparison
+
+| Model | Accuracy | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| Blind All-On-Time Baseline | 0.7667 | 0.0000 | 0.0000 | 0.0000 |
+| Logistic Regression | 0.9056 | 0.7778 | 0.8333 | 0.8046 |
+| Decision Tree (Depth 6) | 0.8833 | 0.7561 | 0.7381 | 0.7470 |
+| Random Forest | 0.9056 | 0.8378 | 0.7381 | 0.7848 |
+
+The all-on-time baseline achieves relatively high accuracy but fails to identify delayed shipments. Therefore, accuracy alone is not sufficient for this classification problem.
+
+### Feature Selection
+
+The feature-selection experiment evaluated five feature counts.
+
+| Selected Features (k) | Validation F1 |
+|---|---:|
+| 5 | 0.6988 |
+| 7 | 0.8333 |
+| 10 | 0.7857 |
+| 12 | 0.8049 |
+| 17 | 0.7848 |
+
+Seven features achieved the highest validation F1 in this experiment.
+
+The top seven features by F-score are:
+
+1. distance_km
+2. hub_tier
+3. hub_daily_capacity
+4. n_stops
+5. promised_hours
+6. rain_flag
+7. sale_event_flag
+
+### Noise Feature Analysis
+
+Five bookkeeping/noise columns were evaluated.
+
+Their combined random-forest importance is **0.2245**, approximately 22.45%.
+
+All five are outside the top seven by F-score:
+
+| Feature | F-Score Rank |
+|---|---:|
+| label_print_batch | 8 |
+| tape_roll_no | 12 |
+| sticker_serial_mod | 14 |
+| shelf_slot_no | 16 |
+| scanner_build_no | 17 |
+
+Each has an F-score below 10.
+
+### Hyperparameter Tuning
+
+Two search strategies were evaluated:
+
+| Search | Candidates | CV Folds | Total Fits | Best CV Accuracy |
+|---|---:|---:|---:|---:|
+| Grid Search | 27 | 5 | 135 | 0.8952 |
+| Randomized Search | 9 | 5 | 45 | 0.8905 |
+
+The untuned random forest using the selected seven features achieved validation F1 of 0.8333, compared with 0.7750 for grid search and 0.7848 for randomized search.
+
+The untuned seven-feature model was therefore retained.
+
+### Threshold Optimization
+
+The selected threshold is **0.5**.
+
+It is the highest tested threshold that maintains validation recall of at least 0.80.
+
+At this threshold:
+
+- Validation precision: 0.7955
+- Validation recall: 0.8333
+- Validation F1: 0.8140
+
+### Final Classification Model
+
+Selected configuration:
+
+| Parameter | Value |
+|---|---|
+| Feature count | 7 |
+| Model | Random Forest |
+| Number of estimators | 100 |
+| Maximum depth | Unlimited |
+| Minimum samples per leaf | 1 |
+| Classification threshold | 0.5 |
+
+### Final Test Performance
+
+| Metric | Test Result |
+|---|---:|
+| Accuracy | 0.8667 |
+| Precision | 0.6889 |
+| Recall | 0.7561 |
+| F1 Score | 0.7209 |
+
+Confusion matrix:
+
+| | Predicted On-Time | Predicted Delayed |
+|---|---:|---:|
+| Actual On-Time | 125 | 14 |
+| Actual Delayed | 10 | 31 |
+
+On the test set, the classifier identified 31 delayed shipments and missed 10 delayed shipments.
+
+Approximately 69% of its positive delay predictions were correct.
+
+The test set contains only 41 delayed shipments, so the reported precision and recall should not be treated as guaranteed long-term production performance.
+
+---
+
+## 8. Part D – Hub Segmentation
+
+The objective is to identify operationally similar hubs and categorize them into actionable groups.
+
+### Hub Profiling
+
+The analysis covers:
+
+- 24 hubs.
+- 50 historical shipments per hub.
+- Mean delivery hours.
+- Delay rate.
+- Mean delivery distance.
+- Mean number of stops.
+
+### Cluster Separation Experiment
+
+| Number of Clusters (K) | Across/Within Ratio | Cluster Sizes |
+|---|---:|---|
+| 2 | 2.8940 | 15-9 |
+| 3 | 5.3928 | 9-8-7 |
+| 4 | 6.3047 | 8-7-5-4 |
+| 5 | 6.8866 | 8-7-4-3-2 |
+
+K=3 was selected because the business requires three practical operating playbooks.
+
+Although K=4 and K=5 achieve higher separation ratios, they produce smaller clusters, including groups of four or fewer hubs.
+
+### Final Hub Segments
+
+| Segment | Number of Hubs | Mean Delivery Hours | Delay Rate |
+|---|---:|---:|---:|
+| Standard | 7 | 47.2396 | 2.57% |
+| Watch | 8 | 56.8137 | 15.50% |
+| Escalate | 9 | 64.6504 | 46.00% |
+
+The Escalate segment has the highest average delivery time, distance, number of stops, and delay rate.
+
+### Tier-versus-Segment Mismatches
+
+The following hubs have a mismatch between their assigned hub tier and their observed operational segment:
+
+| Hub ID | City | Hub Tier | Operational Segment |
+|---|---|---:|---|
+| HUB07 | Kolkata | 1 | Watch |
+| HUB13 | Nagpur | 2 | Escalate |
+| HUB15 | Kochi | 2 | Escalate |
+| HUB22 | Dehradun | 3 | Watch |
+
+This demonstrates that hub tier alone does not fully represent actual delivery performance.
+
+Operational decisions should consider measured performance in addition to the existing hub-tier classification.
+
+---
+
+## 9. Model Packaging and Reload Validation
+
+The classification model is packaged using Joblib.
+
+The following supporting artifacts are generated:
+
+- `models/delay_model.pkl`
+- `models/delay_threshold.csv`
+- `models/feature_order.csv`
+- `models/impute_values.csv`
+
+The model reload check evaluates whether predictions from the reloaded model match the in-memory model.
+
+Validation results:
+
+| Metric | Result |
+|---|---:|
+| Test rows scored | 180 |
+| Reload maximum absolute probability difference | 0.0000000000 |
+| Threshold | 0.5000000000 |
+
+The probability difference of zero confirms consistent predictions between the packaged and reloaded model in this validation run.
+
+---
+
+## 10. New Shipment Predictions and Operational Actions
+
+The final pipeline processes 48 new shipments and generates an operational action for each shipment.
+
+Output file:
+
+`outputs/new_shipment_actions.csv`
+
+The output includes:
+
+- Shipment ID
+- Hub ID
+- Hub segment
+- Delay probability
+- Flagged status
+- Recommended action
+
+### Action Distribution
+
+| Recommended Action | Shipment Count |
+|---|---:|
+| No action | 40 |
+| Escalate to hub manager | 6 |
+| Proactive customer call | 2 |
+| **Total** | **48** |
+
+Eight shipments were flagged for intervention, representing 16.67% of the new shipment batch.
+
+The action logic prioritizes shipments requiring hub-manager intervention or proactive customer communication.
+
+### Example Operational Recommendations
+
+- High-risk shipments at Escalate hubs should receive hub-manager attention.
+- Flagged shipments in Watch hubs should receive proactive customer communication.
+- Shipments below the intervention threshold continue through normal operations.
+
+---
+
+## 11. Production Readiness and Monitoring Plan
+
+The following measures would support a production implementation.
+
+### 11.1 Model Accuracy Monitoring
+
+Track:
+
+- Regression MAE.
+- Regression RMSE.
+- Regression R².
+- Classification precision.
+- Classification recall.
+- Classification F1.
+
+Compare production performance with the current baseline before promoting model updates.
+
+### 11.2 Data Quality Monitoring
+
+Validate:
+
+- Required feature availability.
+- Missing values.
+- Duplicate shipment IDs.
+- Shipment counts between input and output.
+- Feature ordering.
+- Imputation consistency.
+
+Fail the batch if required features are missing or if shipment IDs are duplicated.
+
+### 11.3 Reproducibility
+
+Maintain:
+
+- Fixed random seeds.
+- Pinned dependency versions.
+- Documented execution order.
+- Versioned output CSVs.
+- Packaged model artifacts.
+- Model reload validation.
+
+### 11.4 Performance Monitoring
+
+Record prediction runtime and batch size.
+
+For the reference 48-shipment batch, investigate if prediction runtime exceeds 10 seconds in the target environment. Define production SLAs after measuring realistic workloads.
+
+### 11.5 Feature Drift Monitoring
+
+Track changes in:
+
+- Delivery distance.
+- Number of stops.
+- Rain frequency.
+- Service-type distribution.
+- Hub distribution.
+- Sale-event frequency.
+
+### 11.6 Initial Monitoring Triggers
+
+| Metric | Initial Trigger |
+|---|---|
+| Weekly delayed share | Above 30% or an increase of more than 5 percentage points against the trailing four-week baseline |
+| Flagged shipment share | Above 35% or below 5% |
+| Recall on matured shipments | Below 0.70 over at least 50 delayed shipments |
+| Feature drift | Weekly mean distance or stop count changes by more than 20% |
+| Missing feature rate | Above 2% before imputation |
+
+These are initial investigation thresholds and should be recalibrated using actual production history.
+
+### 11.7 Retraining Strategy
+
+- Retrain monthly initially.
+- Trigger an earlier review when monitoring thresholds are breached.
+- Validate model performance before promoting a new version.
+- Compare sale-event periods with previous sale-event periods rather than ordinary operating weeks.
+
+For the 15–28 September sale window, performance should be compared with equivalent promotional periods because sale-event activity can create a different operational distribution.
+
+---
+
+## 12. Limitations
+
+1. **Synthetic Data:** The dataset is generated locally and reflects the generator's assumptions. It does not represent verified real-world Delhivery shipment behavior.
+2. **Small Test Set:** The classification test set contains only 41 delayed shipments. A small number of outcomes can materially affect precision and recall.
+3. **Threshold Selection:** The classification threshold was selected using one validation split and a grid of nine candidate thresholds.
+4. **Hub Segmentation:** Hub profiles use a limited set of aggregate metrics and 50 historical shipments per hub. Segment assignments should not be treated as permanent labels.
+5. **Probability Calibration:** The classifier's predicted probabilities are not guaranteed to be calibrated. Probability calibration and cost-sensitive evaluation should be considered before production deployment.
+6. **External Validity:** Model performance on synthetic data does not guarantee equivalent performance on actual logistics operations.
+
+---
+
+## 13. Conclusion
+
+The Delhivery Last-Mile Delay Intelligence Pipeline demonstrates an end-to-end machine learning workflow covering data preparation, exploratory analysis, regression, classification, feature selection, model tuning, hub segmentation, model packaging, and operational recommendations.
+
+Key outcomes include:
+
+- A cleaned modelling dataset containing 1,200 shipment records.
+- A Linear Regression model achieving test R² of 0.9493.
+- A Random Forest classifier achieving test F1 of 0.7209.
+- Seven selected classification features.
+- Three operational hub segments: Standard, Watch, and Escalate.
+- Four tier-versus-segment mismatches identified.
+- A packaged model with a successful reload consistency check.
+- Operational recommendations generated for 48 new shipments.
+
+The project provides a reproducible foundation for identifying delivery risks and supporting data-driven last-mile logistics decisions.
+
+---
+
+**Project:** Delhivery Last-Mile Delay Intelligence Pipeline  
+**Program:** AI and Machine Learning Certification Program  
+**Institution:** E&ICT Academy, IIT Roorkee
+
+**Note:** All results are based on the supplied synthetic dataset and should be validated against real operational data before production deployment.
